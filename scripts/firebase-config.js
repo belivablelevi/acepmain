@@ -3,12 +3,12 @@
 // Go to: Firebase Console > Project Settings > Your Apps > Web App
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDeq9Cpi8Jr4hGQOh2YOPQR-GYvlhRr8nQ",
+  authDomain: "acep-11d20.firebaseapp.com",
+  projectId: "acep-11d20",
+  storageBucket: "acep-11d20.firebasestorage.app",
+  messagingSenderId: "648606466091",
+  appId: "1:648606466091:web:5fa808c5b474239d512a6e"
 };
 
 // Initialize Firebase
