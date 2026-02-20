@@ -246,16 +246,31 @@ async function handleSubmission(e) {
     const userRef = db.collection('users').doc(user.uid);
     const userDoc = await userRef.get();
     
-    if (userDoc.exists()) {
+    if (userDoc.exists) {
+      // User document exists, update it
       await userRef.update({
         points: firebase.firestore.FieldValue.increment(selectedChallenge.points),
         challengesCompleted: firebase.firestore.FieldValue.arrayUnion(selectedChallenge.id),
         lastActivity: firebase.firestore.FieldValue.serverTimestamp()
       });
+    } else {
+      // User document doesn't exist, create it
+      await userRef.set({
+        uid: user.uid,
+        email: user.email,
+        username: user.email.split('@')[0],
+        points: selectedChallenge.points,
+        badge: '🌱',
+        level: 1,
+        challengesCompleted: [selectedChallenge.id],
+        joinedDate: firebase.firestore.FieldValue.serverTimestamp(),
+        lastActivity: firebase.firestore.FieldValue.serverTimestamp()
+      });
     }
     
     // Update badge if needed
-    const userData = (await userRef.get()).data();
+    const updatedDoc = await userRef.get();
+    const userData = updatedDoc.data();
     const totalPoints = userData.points || 0;
     let badge = '🌱';
     if (totalPoints >= 5000) badge = '🏆';
