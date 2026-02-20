@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - ACEP</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  
+  <header class="hero" style="min-height: 40vh;">
+    <video class="hero__media" autoplay muted loop playsinline preload="auto">
+      <source src="https://videos.pexels.com/video-files/2098989/2098989-uhd_2560_1440_30fps.mp4" type="video/mp4">
+    </video>
+    <div class="hero__overlay"></div>
+
+    <div class="container">
+      <nav>
+        <a href="index.html" class="logo">
+          <i data-lucide="leaf" class="logo-icon"></i>
+          <div class="logo-text">
+            <h1 class="logo-name">ACEP</h1>
+            <p class="logo-tagline">Alliance for Canadian Environmental Protection</p>
+          </div>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="challenges.html">Challenges</a></li>
+          <li><a href="leaderboard.html" class="active">Leaderboard</a></li>
+          <li><a href="dashboard.html" class="btn-nav" id="dashboardLink" style="display: none;">Dashboard</a></li>
+          <li><a href="#" class="btn-nav" id="authBtn" onclick="toggleAuthModal()">Sign In</a></li>
+        </ul>
+      </nav>
+
+      <div class="hero-content" style="padding: 3rem 0 2rem;">
+        <h1>Canadian Environmental Champions</h1>
+        <p class="hero-subtitle">Top environmental champions ranked by impact</p>
+      </div>
+    </div>
+
+    <svg class="wave" viewBox="0 0 1440 120">
+      <path fill="#f0fdf4" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
+    </svg>
+  </header>
+
+  <main>
+    <!-- Leaderboard -->
+    <section class="section" style="padding-top: 3rem;">
+      <div class="container">
+        <div id="leaderboardTable">
+          <div style="text-align: center; padding: 3rem;">
+            <p style="color: #6b7280;">Loading leaderboard...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="toggleAuthModal()">&times;</span>
+      
+      <div id="signInForm">
+        <h2>Sign In</h2>
+        <form onsubmit="handleSignIn(event)">
+          <input type="email" id="signInEmail" placeholder="Email" required>
+          <input type="password" id="signInPassword" placeholder="Password" required>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+        </form>
+        <p style="margin-top: 1rem; text-align: center;">
+          Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a>
+        </p>
+      </div>
+
+      <div id="signUpForm" style="display: none;">
+        <h2>Create Account</h2>
+        <form onsubmit="handleSignUp(event)">
+          <input type="text" id="signUpUsername" placeholder="Username" required>
+          <input type="email" id="signUpEmail" placeholder="Email" required>
+          <input type="password" id="signUpPassword" placeholder="Password (min 6 characters)" required>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+        </form>
+        <p style="margin-top: 1rem; text-align: center;">
+          Already have an account? <a href="#" onclick="showSignIn()">Sign In</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <i data-lucide="leaf" width="28" height="28"></i>
+            <span>ACEP</span>
+          </div>
+          <p>Fighting for the future of generations.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="challenges.html">Challenges</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact</h4>
+          <p>acep.environmental@gmail.com</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <small>© 2026 ACEP. All rights reserved.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="scripts/firebase-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/leaderboard-working.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+    
+    // Auth modal functions
+    function toggleAuthModal() {
+      const modal = document.getElementById('authModal');
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function showSignIn() {
+      document.getElementById('signInForm').style.display = 'block';
+      document.getElementById('signUpForm').style.display = 'none';
+    }
+
+    function showSignUp() {
+      document.getElementById('signInForm').style.display = 'none';
+      document.getElementById('signUpForm').style.display = 'block';
+    }
+
+    async function handleSignIn(e) {
+      e.preventDefault();
+      const email = document.getElementById('signInEmail').value;
+      const password = document.getElementById('signInPassword').value;
+      
+      try {
+        await authFunctions.signIn(email, password);
+        toggleAuthModal();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function handleSignUp(e) {
+      e.preventDefault();
+      const username = document.getElementById('signUpUsername').value;
+      const email = document.getElementById('signUpEmail').value;
+      const password = document.getElementById('signUpPassword').value;
+      
+      try {
+        await authFunctions.signUp(email, password, username);
+        toggleAuthModal();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    
+    // Update auth button
+    auth.onAuthStateChanged((user) => {
+      const authBtn = document.getElementById('authBtn');
+      const dashboardLink = document.getElementById('dashboardLink');
+      
+      if (user) {
+        authBtn.textContent = 'Sign Out';
+        authBtn.onclick = () => authFunctions.signOut();
+        dashboardLink.style.display = 'inline-flex';
+      } else {
+        authBtn.textContent = 'Sign In';
+        authBtn.onclick = toggleAuthModal;
+        dashboardLink.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
