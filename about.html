@@ -3,121 +3,216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About - ACEP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>About ACEP - Alliance for Canadian Environmental Protection</title>
   <link rel="stylesheet" href="styles/main.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   
-  <!-- Navigation -->
-  <nav class="navbar">
+  <header class="hero" style="min-height: 50vh; background: linear-gradient(135deg, #0c4a3a 0%, #059669 50%, #10b981 100%);">
+    <div class="hero__overlay" style="background: rgba(0,0,0,0.2);"></div>
+
     <div class="container">
-      <div class="nav-wrapper">
+      <nav>
         <a href="index.html" class="logo">
-          <div class="logo-icon">🌿</div>
+          <i data-lucide="leaf" class="logo-icon"></i>
           <div class="logo-text">
-            <span class="logo-name">ACEP</span>
-            <span class="logo-tagline">Environmental Champions</span>
+            <h1 class="logo-name">ACEP</h1>
+            <p class="logo-tagline">Alliance for Canadian Environmental Protection</p>
           </div>
         </a>
-        
+
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
           <li><a href="about.html" class="active">About</a></li>
           <li><a href="challenges.html">Challenges</a></li>
           <li><a href="leaderboard.html">Leaderboard</a></li>
+          <li><a href="dashboard.html" class="btn-nav" id="dashboardLink" style="display: none;">Dashboard</a></li>
+          <li><a href="#" class="btn-nav" id="authBtn" onclick="toggleAuthModal()">Sign In</a></li>
         </ul>
-        
-        <a href="dashboard.html" class="btn btn-primary">Dashboard</a>
+      </nav>
+
+      <div class="hero-content" style="padding: 4rem 0 2rem; position: relative; z-index: 5;">
+        <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 1rem;">Our Mission</h1>
+        <p class="hero-subtitle" style="max-width: 600px; margin: 0 auto;">Empowering Canadians to protect our environment through action, one mission at a time.</p>
       </div>
     </div>
-  </nav>
 
-  <!-- Page Header -->
-  <section class="page-header">
-    <div class="container">
-      <h1>About ACEP</h1>
-      <p>Alliance for Community Environmental Protection</p>
-    </div>
-  </section>
+    <svg class="wave" viewBox="0 0 1440 120">
+      <path fill="#f0fdf4" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
+    </svg>
+  </header>
 
-  <!-- Mission -->
-  <section class="section">
-    <div class="container">
-      <div style="max-width: 800px; margin: 0 auto;">
-        <div class="section-header">
-          <span class="section-label">Our Mission</span>
-          <h2 class="section-title">Fighting for Future Generations</h2>
+  <main>
+    <!-- Story Section -->
+    <section class="section" style="padding: 4rem 0;">
+      <div class="container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+          <div>
+            <span style="color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">Our Story</span>
+            <h2 style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0; line-height: 1.2;">Fighting for Future Generations</h2>
+            <p style="color: #6b7280; font-size: 1.125rem; line-height: 1.8; margin-bottom: 1.5rem;">
+              ACEP was founded on the belief that everyday Canadians can make extraordinary environmental impact. We saw the urgent need to address water pollution across our beautiful provinces—from the Great Lakes to the Pacific coast.
+            </p>
+            <p style="color: #6b7280; font-size: 1.125rem; line-height: 1.8; margin-bottom: 1.5rem;">
+              Through gamification and community engagement, we're turning environmental protection into an adventure. Every mission completed is a step toward cleaner water, healthier ecosystems, and a sustainable future for Canada.
+            </p>
+            <div style="display: flex; gap: 2rem; margin-top: 2rem;">
+              <div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: #059669;">2026</div>
+                <div style="color: #6b7280; font-weight: 600;">Founded</div>
+              </div>
+              <div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: #059669;">10</div>
+                <div style="color: #6b7280; font-weight: 600;">Provinces</div>
+              </div>
+              <div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: #059669;">100%</div>
+                <div style="color: #6b7280; font-weight: 600;">Free</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <img src="https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?auto=format&fit=crop&w=800&q=80" alt="Canadian nature" style="width: 100%; height: 500px; object-fit: cover; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+          </div>
         </div>
-        
-        <p style="font-size: 1.125rem; color: var(--gray-700); line-height: 1.8; margin-bottom: 2rem;">
-          ACEP is dedicated to protecting our planet through community-driven environmental action. We focus on combating the most pressing pollution threats facing our ecosystems today: industrial and agricultural runoff, wastewater contamination, harmful substances, and eutrophication.
-        </p>
-        
-        <p style="font-size: 1.125rem; color: var(--gray-700); line-height: 1.8;">
-          By gamifying environmental action, we make it engaging and rewarding for individuals to make a real difference. Every challenge completed, every pollution source reported, every water body monitored contributes to a healthier planet.
-        </p>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Stats -->
-  <section class="section bg-light">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Our Impact</h2>
+    <!-- Focus Areas -->
+    <section class="section" style="background: white; padding: 4rem 0;">
+      <div class="container">
+        <div style="text-align: center; max-width: 700px; margin: 0 auto 3rem;">
+          <span style="color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">What We Fight</span>
+          <h2 style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0;">Four Critical Threats</h2>
+          <p style="color: #6b7280; font-size: 1.125rem;">We focus on the most urgent water pollution issues affecting Canadian ecosystems.</p>
+        </div>
+
+        <div class="grid-4">
+          <div style="background: linear-gradient(135deg, #fee2e2, #fecaca); padding: 2rem; border-radius: 16px; text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🏭</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: #991b1b;">Industrial Runoff</h3>
+            <p style="color: #7f1d1d; font-size: 0.9375rem;">Toxic chemicals from factories contaminating waterways</p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 2rem; border-radius: 16px; text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">💧</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: #1e40af;">Wastewater</h3>
+            <p style="color: #1e3a8a; font-size: 0.9375rem;">Untreated sewage threatening public health</p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 2rem; border-radius: 16px; text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">☠️</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: #92400e;">Harmful Substances</h3>
+            <p style="color: #78350f; font-size: 0.9375rem;">Hazardous waste endangering wildlife</p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 2rem; border-radius: 16px; text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🌊</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: #065f46;">Eutrophication</h3>
+            <p style="color: #064e3b; font-size: 0.9375rem;">Nutrient pollution causing toxic algae blooms</p>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section" style="padding: 4rem 0;">
+      <div class="container">
+        <div style="text-align: center; max-width: 700px; margin: 0 auto 3rem;">
+          <span style="color: #059669; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.875rem;">Join the Fight</span>
+          <h2 style="font-size: 2.5rem; font-weight: 800; margin: 1rem 0;">How ACEP Works</h2>
+          <p style="color: #6b7280; font-size: 1.125rem;">Making environmental protection engaging and rewarding</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+          <div style="text-align: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #14b8a6, #0d9488); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white; font-size: 2rem; font-weight: 800; box-shadow: 0 10px 30px rgba(20, 184, 166, 0.3);">1</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.75rem;">Sign Up Free</h3>
+            <p style="color: #6b7280;">Create your environmental champion account in seconds</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white; font-size: 2rem; font-weight: 800; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);">2</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.75rem;">Accept Missions</h3>
+            <p style="color: #6b7280;">Browse environmental missions in your area</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #a855f7, #9333ea); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white; font-size: 2rem; font-weight: 800; box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3);">3</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.75rem;">Take Action</h3>
+            <p style="color: #6b7280;">Complete missions, submit photo evidence</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white; font-size: 2rem; font-weight: 800; box-shadow: 0 10px 30px rgba(251, 191, 36, 0.3);">4</div>
+            <h3 style="font-weight: 700; margin-bottom: 0.75rem;">Earn Rewards</h3>
+            <p style="color: #6b7280;">Get points, badges, and climb the leaderboard</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section style="background: linear-gradient(135deg, #0c4a3a 0%, #059669 50%, #10b981 100%); padding: 5rem 0; text-align: center; color: white;">
+      <div class="container">
+        <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Ready to Make Impact?</h2>
+        <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9;">Join thousands of Canadians protecting our environment</p>
+        <a href="challenges.html" class="btn" style="background: white; color: #059669; padding: 1rem 2.5rem; font-size: 1.125rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.75rem;">
+          <i data-lucide="rocket" width="24" height="24"></i>
+          Start Your First Mission
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="toggleAuthModal()">&times;</span>
       
-      <div class="grid-4">
-        <div class="text-center">
-          <div style="font-size: 3rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">50,000+</div>
-          <div style="color: var(--gray-600); font-weight: 600;">Active Members</div>
-        </div>
-        <div class="text-center">
-          <div style="font-size: 3rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">750+</div>
-          <div style="color: var(--gray-600); font-weight: 600;">Reports Filed</div>
-        </div>
-        <div class="text-center">
-          <div style="font-size: 3rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">1.2M+</div>
-          <div style="color: var(--gray-600); font-weight: 600;">Points Earned</div>
-        </div>
-        <div class="text-center">
-          <div style="font-size: 3rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem;">25</div>
-          <div style="color: var(--gray-600); font-weight: 600;">Countries</div>
-        </div>
+      <div id="signInForm">
+        <h2>Sign In</h2>
+        <form onsubmit="handleSignIn(event)">
+          <input type="email" id="signInEmail" placeholder="Email" required>
+          <input type="password" id="signInPassword" placeholder="Password" required>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+        </form>
+        <p style="margin-top: 1rem; text-align: center;">
+          Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a>
+        </p>
+      </div>
+
+      <div id="signUpForm" style="display: none;">
+        <h2>Create Account</h2>
+        <form onsubmit="handleSignUp(event)">
+          <input type="text" id="signUpUsername" placeholder="Username" required>
+          <input type="email" id="signUpEmail" placeholder="Email" required>
+          <input type="password" id="signUpPassword" placeholder="Password (min 6 characters)" required>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+        </form>
+        <p style="margin-top: 1rem; text-align: center;">
+          Already have an account? <a href="#" onclick="showSignIn()">Sign In</a>
+        </p>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- CTA -->
-  <section class="cta-section">
-    <div class="container">
-      <div class="cta-content">
-        <h2>Join the Movement</h2>
-        <p>Be part of a global community fighting pollution and protecting our planet</p>
-        <div class="cta-actions">
-          <a href="dashboard.html" class="btn btn-large btn-white">
-            <i data-lucide="rocket"></i>
-            Get Started Free
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="footer-logo">
-            <div class="logo-icon">🌿</div>
+            <i data-lucide="leaf" width="28" height="28"></i>
             <span>ACEP</span>
           </div>
-          <p>Fighting for the future of generations through community-driven environmental action.</p>
+          <p>Fighting for the future of generations.</p>
         </div>
-        
         <div class="footer-links">
           <h4>Platform</h4>
           <ul>
@@ -126,7 +221,6 @@
             <li><a href="dashboard.html">Dashboard</a></li>
           </ul>
         </div>
-        
         <div class="footer-links">
           <h4>Company</h4>
           <ul>
@@ -134,25 +228,80 @@
             <li><a href="#">Contact</a></li>
           </ul>
         </div>
-        
         <div class="footer-contact">
           <h4>Contact</h4>
           <p>acep.environmental@gmail.com</p>
-          <p>+1 (234) 567-890</p>
         </div>
       </div>
-      
       <div class="footer-bottom">
-        <p>&copy; 2026 ACEP. All rights reserved.</p>
+        <small>© 2026 ACEP. All rights reserved.</small>
       </div>
     </div>
   </footer>
 
-  <script src="scripts/main.js"></script>
+  <script src="scripts/firebase-config.js"></script>
+  <script src="scripts/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+      }
+    });
+    
+    function toggleAuthModal() {
+      const modal = document.getElementById('authModal');
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function showSignIn() {
+      document.getElementById('signInForm').style.display = 'block';
+      document.getElementById('signUpForm').style.display = 'none';
+    }
+
+    function showSignUp() {
+      document.getElementById('signInForm').style.display = 'none';
+      document.getElementById('signUpForm').style.display = 'block';
+    }
+
+    async function handleSignIn(e) {
+      e.preventDefault();
+      const email = document.getElementById('signInEmail').value;
+      const password = document.getElementById('signInPassword').value;
+      
+      try {
+        await authFunctions.signIn(email, password);
+        toggleAuthModal();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function handleSignUp(e) {
+      e.preventDefault();
+      const username = document.getElementById('signUpUsername').value;
+      const email = document.getElementById('signUpEmail').value;
+      const password = document.getElementById('signUpPassword').value;
+      
+      try {
+        await authFunctions.signUp(email, password, username);
+        toggleAuthModal();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    
+    auth.onAuthStateChanged((user) => {
+      const authBtn = document.getElementById('authBtn');
+      const dashboardLink = document.getElementById('dashboardLink');
+      
+      if (user) {
+        authBtn.textContent = 'Sign Out';
+        authBtn.onclick = () => authFunctions.signOut();
+        dashboardLink.style.display = 'inline-flex';
+      } else {
+        authBtn.textContent = 'Sign In';
+        authBtn.onclick = toggleAuthModal;
+        dashboardLink.style.display = 'none';
       }
     });
   </script>
