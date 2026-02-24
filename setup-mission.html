@@ -11,7 +11,7 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      max-width: 800px;
+      max-width: 900px;
       margin: 50px auto;
       padding: 20px;
       background: #f0fdf4;
@@ -50,6 +50,32 @@
       background: #fee2e2;
       color: #991b1b;
       border-left: 4px solid #ef4444;
+    }
+    .warning {
+      background: #fef3c7;
+      color: #92400e;
+      border-left: 4px solid #f59e0b;
+    }
+    .config-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 2px dashed #d1d5db;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #059669;
     }
     button {
       background: #059669;
@@ -95,6 +121,8 @@
       margin-top: 20px;
       font-size: 14px;
       color: #6b7280;
+      max-height: 400px;
+      overflow-y: auto;
     }
     .mission-item {
       padding: 8px;
@@ -109,31 +137,64 @@
       border-radius: 4px;
       font-family: 'Courier New', monospace;
     }
+    .step {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f0fdf4;
+      border-left: 4px solid #059669;
+      border-radius: 8px;
+    }
+    .step h3 {
+      margin: 0 0 10px 0;
+      color: #059669;
+    }
   </style>
 
 </head>
 <body>
   <div class="container">
     <h1>🚀 ACEP Mission Setup</h1>
-    <p class="subtitle">Automatically add all 20 missions to your Firebase in one click!</p>
+    <p class="subtitle">Paste your Firebase config and add all 20 missions in one click!</p>
 
 ```
 <div id="status" class="status info">
-  ℹ️ Ready to add missions! Make sure you've already added your Firebase config to firebase-config.js
+  ℹ️ Follow the steps below to automatically add all missions
 </div>
 
-<div id="instructions">
-  <h3>Instructions:</h3>
+<div class="step">
+  <h3>Step 1: Get Your Firebase Config</h3>
   <ol>
-    <li>Make sure <code>scripts/firebase-config.js</code> has your Firebase settings</li>
-    <li>Upload this file to your GitHub repository</li>
-    <li>Visit: <code>https://yourusername.github.io/acep-website/setup-missions.html</code></li>
-    <li>Click the button below!</li>
+    <li>Go to <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></li>
+    <li>Click your project</li>
+    <li>Click gear icon ⚙️ → Project settings</li>
+    <li>Scroll to "Your apps" section</li>
+    <li>Find the <code>firebaseConfig</code> object</li>
+    <li>Copy the ENTIRE config (should look like example below)</li>
   </ol>
 </div>
 
+<div class="config-section">
+  <label style="display: block; font-weight: 700; margin-bottom: 10px; color: #111827;">
+    Paste Your Firebase Config Here:
+  </label>
+  <textarea id="configInput" placeholder='{
+```
+
+apiKey: “AIzaSyC-xxxxxxxxxxxxxx”,
+authDomain: “your-project.firebaseapp.com”,
+projectId: “your-project”,
+storageBucket: “your-project.appspot.com”,
+messagingSenderId: “123456789”,
+appId: “1:123456789:web:xxxxx”
+}’></textarea>
+<div class="status warning" style="margin-top: 15px; font-size: 14px;">
+⚠️ Make sure to paste the ENTIRE config object including the curly braces { }
+</div>
+</div>
+
+```
 <button id="setupBtn" onclick="setupMissions()">
-  🎯 Add All 20 Missions Now!
+  🎯 Initialize Firebase & Add All 20 Missions!
 </button>
 
 <div id="progress" class="progress" style="display: none;">
@@ -146,9 +207,9 @@
 
   </div>
 
-  <script src="scripts/firebase-config.js"></script>
-
   <script>
+    let db = null;
+    
     const missions = [
       {
         id: 'mission1',
@@ -358,18 +419,47 @@
       const progress = document.getElementById('progress');
       const progressFill = document.getElementById('progressFill');
       const missionList = document.getElementById('missionList');
+      const configInput = document.getElementById('configInput').value.trim();
+      
+      // Validate input
+      if (!configInput) {
+        status.className = 'status error';
+        status.textContent = '❌ Please paste your Firebase config first!';
+        return;
+      }
       
       btn.disabled = true;
       progress.style.display = 'block';
       
       try {
-        // Check Firebase connection
-        if (!db) {
-          throw new Error('Firebase not initialized! Make sure firebase-config.js is loaded.');
+        // Parse and initialize Firebase
+        status.className = 'status info';
+        status.textContent = '🔄 Initializing Firebase...';
+        
+        let firebaseConfig;
+        try {
+          // Try to parse as JSON
+          firebaseConfig = JSON.parse(configInput);
+        } catch (e) {
+          // If not valid JSON, try to extract object
+          const match = configInput.match(/\{[\s\S]*\}/);
+          if (match) {
+            // Convert JavaScript object notation to JSON
+            const cleaned = match[0]
+              .replace(/(\w+):/g, '"$1":')  // Add quotes to keys
+              .replace(/'/g, '"');           // Replace single quotes with double
+            firebaseConfig = JSON.parse(cleaned);
+          } else {
+            throw new Error('Could not parse config. Make sure you pasted the entire config object.');
+          }
         }
         
-        status.className = 'status info';
-        status.textContent = '🔥 Connected to Firebase! Adding missions...';
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        
+        status.className = 'status success';
+        status.textContent = '✅ Firebase connected! Adding missions...';
         
         let completed = 0;
         missionList.innerHTML = '';
@@ -401,12 +491,12 @@
         }
         
         status.className = 'status success';
-        status.innerHTML = `🎉 SUCCESS! Added ${completed} out of ${missions.length} missions!<br><br>Go to your website and check the missions page!`;
-        btn.textContent = '✅ Missions Added!';
+        status.innerHTML = `🎉 SUCCESS! Added all ${completed} missions!<br><br>✅ Go to your website and check missions page!<br>✅ You can close this page now!`;
+        btn.textContent = '✅ All Missions Added!';
         
       } catch (error) {
         status.className = 'status error';
-        status.textContent = `❌ Error: ${error.message}`;
+        status.innerHTML = `❌ Error: ${error.message}<br><br>Make sure you pasted the correct Firebase config!`;
         btn.disabled = false;
         btn.textContent = '🔄 Try Again';
         console.error('Setup error:', error);
