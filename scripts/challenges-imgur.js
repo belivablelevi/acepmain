@@ -61,7 +61,7 @@ function getChallengeImage(category) {
     industrial: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?auto=format&fit=crop&w=900&q=60',
     wastewater: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=900&q=60',
     harmful: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=900&q=60',
-    eutrophication: 'https://images.unsplash.com/photo-1583425423320-2386622cd2e4?auto=format&fit=crop&w=900&q=60',
+    eutrophication: 'https://i.guim.co.uk/img/static/sys-images/Guardian/Pix/pictures/2013/7/4/1372928237325/91fb3c94-086c-4470-a98e-23ec4ff993d8-460x276.jpeg?width=465&dpr=1&s=none&crop=none',
     pollution: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=900&q=60'
   };
   return images[category] || images.pollution;
