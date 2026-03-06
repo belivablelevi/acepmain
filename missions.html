@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Missions - ACEP</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <style>
+    .mission-card-large {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .mission-card-large:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    
+    .mission-hero {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      position: relative;
+    }
+    
+    .mission-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: white;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .mission-body {
+      padding: 1.75rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .mission-category {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    
+    .mission-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+    
+    .mission-description {
+      color: #6b7280;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+    
+    .mission-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 2px solid #f3f4f6;
+    }
+    
+    .mission-difficulty {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .filters-bar {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filter-btn-new {
+      padding: 0.625rem 1.25rem;
+      border-radius: 999px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9375rem;
+    }
+    
+    .filter-btn-new:hover {
+      border-color: #059669;
+      background: #f0fdf4;
+      color: #059669;
+    }
+    
+    .filter-btn-new.active {
+      background: #059669;
+      color: white;
+      border-color: #059669;
+    }
+  </style>
+</head>
+<body>
+  
+  <header class="hero" style="min-height: 45vh; background: linear-gradient(135deg, #0c4a3a 0%, #059669 50%, #10b981 100%);">
+    <div class="hero__overlay" style="background: rgba(0,0,0,0.2);"></div>
+
+    <div class="container">
+      <nav>
+        <a href="index.html" class="logo">
+          <i data-lucide="leaf" class="logo-icon"></i>
+          <div class="logo-text">
+            <h1 class="logo-name">ACEP</h1>
+            <p class="logo-tagline">Alliance for Canadian Environmental Protection</p>
+          </div>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="missions.html" class="active">Missions</a></li>
+          <li><a href="leaderboard.html">Leaderboard</a></li>
+          <li><a href="dashboard.html" class="btn-nav" id="dashboardLink" style="display: none;">Dashboard</a></li>
+          <li><a href="#" class="btn-nav" id="authBtn" onclick="toggleAuthModal()">Sign In</a></li>
+        </ul>
+      </nav>
+
+      <div class="hero-content" style="padding: 4rem 0 2rem; position: relative; z-index: 5;">
+        <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 1rem;">Environmental Missions</h1>
+        <p class="hero-subtitle" style="max-width: 600px; margin: 0 auto;">Choose your mission, make your impact, earn rewards</p>
+      </div>
+    </div>
+
+    <svg class="wave" viewBox="0 0 1440 120">
+      <path fill="#f0fdf4" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
+    </svg>
+  </header>
+
+  <main>
+    <section class="section" style="padding: 2rem 0 4rem;">
+      <div class="container">
+        
+        <!-- Filters -->
+        <div class="filters-bar">
+          <span style="font-weight: 700; color: #111827;">Filter by:</span>
+          <button class="filter-btn-new active" onclick="filterMissions('all')">All Missions</button>
+          <button class="filter-btn-new" onclick="filterMissions('industrial')">🏭 Industrial</button>
+          <button class="filter-btn-new" onclick="filterMissions('wastewater')">💧 Wastewater</button>
+          <button class="filter-btn-new" onclick="filterMissions('harmful')">☠️ Harmful Substances</button>
+          <button class="filter-btn-new" onclick="filterMissions('eutrophication')">🌊 Eutrophication</button>
+          <button class="filter-btn-new" onclick="filterMissions('pollution')">🗑️ General Pollution</button>
+        </div>
+
+        <!-- Missions Grid -->
+        <div id="missionsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem;">
+          <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+            <p style="color: #6b7280;">Loading missions...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mission Detail Modal -->
+  <div id="missionModal" class="modal">
+    <div class="modal-content modal-large" style="max-width: 900px;">
+      <span class="modal-close" onclick="closeMissionModal()">&times;</span>
+      <div id="missionDetail"></div>
+    </div>
+  </div>
+
+  <!-- Submission Modal -->
+  <div id="submissionModal" class="modal">
+    <div class="modal-content modal-large">
+      <span class="modal-close" onclick="closeSubmissionModal()">&times;</span>
+      <h2 style="margin-bottom: 1.5rem;">Submit Mission Evidence</h2>
+      <form id="submissionForm" onsubmit="handleSubmission(event)">
+        <div class="form-group">
+          <label>Mission</label>
+          <p id="submissionMissionName" style="font-weight: 700; color: #059669; font-size: 1.125rem;"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="submissionDescription">What did you do? *</label>
+          <textarea id="submissionDescription" rows="4" required placeholder="Describe your environmental action in detail..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="submissionPhotos">Photo Evidence * (2-5 photos)</label>
+          <input type="file" id="submissionPhotos" accept="image/*" multiple required>
+          <div id="photoPreview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; margin-top: 1rem;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="submissionLocation">Location</label>
+          <input type="text" id="submissionLocation" placeholder="Where did you complete this mission?">
+          <button type="button" onclick="getCurrentLocation()" class="btn btn-secondary" style="margin-top: 0.75rem;">
+            <i data-lucide="map-pin"></i>
+            Use My Location
+          </button>
+        </div>
+
+        <div id="uploadProgress" style="display: none; margin: 1.5rem 0;">
+          <div style="background: #e5e7eb; height: 10px; border-radius: 999px; overflow: hidden;">
+            <div id="progressBar" style="background: linear-gradient(90deg, #059669, #10b981); height: 100%; width: 0%; transition: width 0.3s;"></div>
+          </div>
+          <p id="progressText" style="text-align: center; margin-top: 0.75rem; color: #6b7280; font-weight: 600;"></p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-large" style="width: 100%;" id="submitBtn">
+          <i data-lucide="check-circle"></i>
+          Complete Mission
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="toggleAuthModal()">&times;</span>
+      
+      <div id="signInForm">
+        <h2>Sign In</h2>
+        <form onsubmit="handleSignIn(event)">
+          <input type="email" id="signInEmail" placeholder="Email" required>
+          <input type="password" id="signInPassword" placeholder="Password" required>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+        </form>
+        <p style="margin-top: 1rem; text-align: center;">
+          Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a>
+        </p>
+      </div>
+
+      <div id="signUpForm" style="display: none;">
+        <h2>Create Account</h2>
+        <form onsubmit="handleSignUp(event)">
+          <input type="text" id="signUpUsername" placeholder="Username" required>
+          <input type="email" id="signUpEmail" placeholder="Email" required>
+          <input type="password" id="signUpPassword" placeholder="Password (min 6 characters)" required>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+        </form>
+        <p style="margin-top: 1rem; text-align: center;">
+          Already have an account? <a href="#" onclick="showSignIn()">Sign In</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <i data-lucide="leaf" width="28" height="28"></i>
+            <span>ACEP</span>
+          </div>
+          <p>Fighting for the future of generations.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="missions.html">Missions</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact</h4>
+          <p>acep.environmental@gmail.com</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <small>© 2026 ACEP. All rights reserved.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="scripts/firebase-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/image-upload.js"></script>
+  <script src="scripts/missions.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
