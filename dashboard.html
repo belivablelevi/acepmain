@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - ACEP</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav>
+        <a href="index.html" class="logo">
+          <i data-lucide="leaf" class="logo-icon"></i>
+          <div class="logo-text">
+            <h1 class="logo-name">ACEP</h1>
+            <p class="logo-tagline">Alliance for Canadian Environmental Protection</p>
+          </div>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="missions.html">Missions</a></li>
+          <li><a href="leaderboard.html">Leaderboard</a></li>
+          <li><a href="dashboard.html" class="btn-nav active">Dashboard</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Dashboard Header -->
+    <section class="page-header">
+      <div class="container">
+        <div class="dashboard-header">
+          <div>
+            <h1>
+              <i data-lucide="layout-dashboard" width="40" height="40"></i>
+              My Dashboard
+            </h1>
+            <p id="welcomeMessage">Welcome back, Champion!</p>
+          </div>
+          <div class="header-actions">
+            <button id="signOutBtn" class="btn btn-secondary">
+              <i data-lucide="log-out" width="18" height="18"></i>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Auth Section -->
+    <section id="authSection" class="section">
+      <div class="container">
+        <div class="auth-container">
+          <div class="auth-card">
+            <h2>
+              <i data-lucide="user-plus" width="32" height="32"></i>
+              Join the Environmental Champions
+            </h2>
+            <p>Create your profile to start making impact</p>
+            
+            <form id="signupForm" class="auth-form">
+              <div class="form-group">
+                <label for="signupEmail">Email</label>
+                <input type="email" id="signupEmail" placeholder="your@email.com" required>
+              </div>
+              <div class="form-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" placeholder="At least 6 characters" required>
+              </div>
+              <div class="form-group">
+                <label for="signupUsername">Username</label>
+                <input type="text" id="signupUsername" placeholder="Your champion name" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">
+                Create Account
+              </button>
+            </form>
+
+            <div class="auth-divider">
+              <span>Already have an account?</span>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+              <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com" required>
+              </div>
+              <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Your password" required>
+              </div>
+              <button type="submit" class="btn btn-secondary btn-full">
+                Sign In
+              </button>
+            </form>
+
+            <div id="authError" class="error-message" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard Content -->
+    <section id="dashboardContent" class="section" style="display: none;">
+      <div class="container">
+        <!-- Stats Grid -->
+        <div class="grid-4">
+          <div class="stat-card">
+            <div class="stat-icon teal">
+              <i data-lucide="award" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="userPoints">0</div>
+            <div class="stat-label">Total Points</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <i data-lucide="check-circle" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="userMissions">0</div>
+            <div class="stat-label">Missions Completed</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <i data-lucide="trophy" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="userRank">-</div>
+            <div class="stat-label">Leaderboard Rank</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <i data-lucide="medal" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="userBadge">🌱</div>
+            <div class="stat-label">Current Badge</div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-section">
+          <div class="section-header">
+            <h2>
+              <i data-lucide="activity" width="28" height="28"></i>
+              Recent Submissions
+            </h2>
+            <a href="missions.html" class="btn btn-primary">
+              <i data-lucide="plus" width="18" height="18"></i>
+              New Mission
+            </a>
+          </div>
+
+          <div id="recentSubmissions" class="submissions-grid">
+            <div class="loading-state">
+              <i data-lucide="loader" class="spinning" width="32" height="32"></i>
+              <p>Loading submissions...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="dashboard-section">
+          <h2>
+            <i data-lucide="trending-up" width="28" height="28"></i>
+            Your Progress
+          </h2>
+          
+          <div class="progress-cards">
+            <div class="progress-card">
+              <div class="progress-header">
+                <span class="progress-label">Points to Next Badge</span>
+                <span class="progress-value" id="pointsToNext">0 / 200</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="badgeProgress" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="badge-grid">
+            <div class="badge-item earned">
+              <div class="badge-emoji">🌱</div>
+              <div class="badge-name">Seedling</div>
+              <div class="badge-requirement">0 points</div>
+            </div>
+            <div class="badge-item" id="badge-sprout">
+              <div class="badge-emoji">🌿</div>
+              <div class="badge-name">Sprout</div>
+              <div class="badge-requirement">200 points</div>
+            </div>
+            <div class="badge-item" id="badge-tree">
+              <div class="badge-emoji">🌳</div>
+              <div class="badge-name">Tree</div>
+              <div class="badge-requirement">500 points</div>
+            </div>
+            <div class="badge-item" id="badge-star">
+              <div class="badge-emoji">⭐</div>
+              <div class="badge-name">Star</div>
+              <div class="badge-requirement">1000 points</div>
+            </div>
+            <div class="badge-item" id="badge-medal">
+              <div class="badge-emoji">🏅</div>
+              <div class="badge-name">Medal</div>
+              <div class="badge-requirement">2000 points</div>
+            </div>
+            <div class="badge-item" id="badge-hero">
+              <div class="badge-emoji">🦸</div>
+              <div class="badge-name">Hero</div>
+              <div class="badge-requirement">3000 points</div>
+            </div>
+            <div class="badge-item" id="badge-champion">
+              <div class="badge-emoji">🏆</div>
+              <div class="badge-name">Champion</div>
+              <div class="badge-requirement">5000 points</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <i data-lucide="leaf" width="28" height="28"></i>
+            <span>ACEP</span>
+          </div>
+          <p>Fighting for the future of generations through community-driven environmental action.</p>
+        </div>
+
+        <div class="footer-links">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="missions.html">Missions</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-contact">
+          <h4>Contact</h4>
+          <p>acep.environmental@gmail.com</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <small>© 2026 ACEP. A Non-Profit Organization. All rights reserved.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="scripts/main.js"></script>
+  <script src="scripts/dashboard-working.js" type="module"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

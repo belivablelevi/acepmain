@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - ACEP</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <nav>
+        <a href="index.html" class="logo">
+          <i data-lucide="leaf" class="logo-icon"></i>
+          <div class="logo-text">
+            <h1 class="logo-name">ACEP</h1>
+            <p class="logo-tagline">Alliance for Canadian Environmental Protection</p>
+          </div>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="missions.html">Missions</a></li>
+          <li><a href="leaderboard.html" class="active">Leaderboard</a></li>
+          <li><a href="dashboard.html" class="btn-nav">Dashboard</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Page Header -->
+    <section class="page-header">
+      <div class="container">
+        <h1>
+          <i data-lucide="trophy" width="40" height="40"></i>
+          Environmental Champions Leaderboard
+        </h1>
+        <p>Recognizing Canada's top environmental action leaders</p>
+      </div>
+    </section>
+
+    <!-- Leaderboard Section -->
+    <section class="section">
+      <div class="container">
+        <!-- Filter Controls -->
+        <div class="leaderboard-controls">
+          <div class="control-group">
+            <label for="timeFilter">Time Period:</label>
+            <select id="timeFilter" class="filter-select">
+              <option value="all">All Time</option>
+              <option value="month">This Month</option>
+              <option value="week">This Week</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="categoryFilter">Category:</label>
+            <select id="categoryFilter" class="filter-select">
+              <option value="all">All Categories</option>
+              <option value="industrial">Industrial Runoff</option>
+              <option value="wastewater">Wastewater</option>
+              <option value="harmful">Harmful Substances</option>
+              <option value="eutrophication">Eutrophication</option>
+            </select>
+          </div>
+
+          <button id="refreshBtn" class="btn btn-secondary">
+            <i data-lucide="refresh-cw" width="18" height="18"></i>
+            Refresh
+          </button>
+        </div>
+
+        <!-- Top 3 Podium -->
+        <div class="podium">
+          <div class="podium-place second" id="secondPlace">
+            <div class="podium-avatar">
+              <div class="avatar-placeholder">
+                <i data-lucide="user" width="40" height="40"></i>
+              </div>
+              <div class="podium-rank silver">2</div>
+            </div>
+            <h3 class="podium-name">Loading...</h3>
+            <div class="podium-badge">🌿</div>
+            <div class="podium-points">0 points</div>
+          </div>
+
+          <div class="podium-place first" id="firstPlace">
+            <div class="podium-avatar">
+              <div class="avatar-placeholder">
+                <i data-lucide="user" width="48" height="48"></i>
+              </div>
+              <div class="podium-rank gold">1</div>
+            </div>
+            <h3 class="podium-name">Loading...</h3>
+            <div class="podium-badge">🏆</div>
+            <div class="podium-points">0 points</div>
+          </div>
+
+          <div class="podium-place third" id="thirdPlace">
+            <div class="podium-avatar">
+              <div class="avatar-placeholder">
+                <i data-lucide="user" width="40" height="40"></i>
+              </div>
+              <div class="podium-rank bronze">3</div>
+            </div>
+            <h3 class="podium-name">Loading...</h3>
+            <div class="podium-badge">🌱</div>
+            <div class="podium-points">0 points</div>
+          </div>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="leaderboard-table">
+          <table>
+            <thead>
+              <tr>
+                <th width="60">Rank</th>
+                <th>Champion</th>
+                <th width="120">Badge</th>
+                <th width="120">Points</th>
+                <th width="140">Missions</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+              <tr>
+                <td colspan="5" class="loading-cell">
+                  <i data-lucide="loader" class="spinning" width="24" height="24"></i>
+                  Loading champions...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <i data-lucide="users" width="64" height="64"></i>
+          <h3>No Champions Yet</h3>
+          <p>Be the first to complete missions and earn your place on the leaderboard!</p>
+          <a href="missions.html" class="btn btn-primary">
+            Start Your Journey
+            <i data-lucide="arrow-right" width="18" height="18"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section" style="background: white;">
+      <div class="container">
+        <h2 class="section-heading">Community Impact</h2>
+        <div class="grid-4">
+          <div class="stat-card">
+            <div class="stat-icon teal">
+              <i data-lucide="users" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="totalChampions">0</div>
+            <div class="stat-label">Active Champions</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <i data-lucide="award" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="totalPoints">0</div>
+            <div class="stat-label">Total Points Earned</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <i data-lucide="check-circle" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="totalMissions">0</div>
+            <div class="stat-label">Missions Completed</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <i data-lucide="trending-up" width="32" height="32"></i>
+            </div>
+            <div class="stat-value" id="avgPoints">0</div>
+            <div class="stat-label">Avg Points/Champion</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <i data-lucide="leaf" width="28" height="28"></i>
+            <span>ACEP</span>
+          </div>
+          <p>Fighting for the future of generations through community-driven environmental action.</p>
+        </div>
+
+        <div class="footer-links">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="missions.html">Missions</a></li>
+            <li><a href="leaderboard.html">Leaderboard</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-contact">
+          <h4>Contact</h4>
+          <p>acep.environmental@gmail.com</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <small>© 2026 ACEP. A Non-Profit Organization. All rights reserved.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="scripts/main.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getFirestore, collection, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeq9Cpi8Jr4hGQOh2YOPQR-GYvlhRr8nQ",
+      authDomain: "acep-11d20.firebaseapp.com",
+      projectId: "acep-11d20",
+      storageBucket: "acep-11d20.firebasestorage.app",
+      messagingSenderId: "648606466091",
+      appId: "1:648606466091:web:5fa808c5b474239d512a6e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const badgeEmojis = {
+      'Seedling': '🌱',
+      'Sprout': '🌿',
+      'Tree': '🌳',
+      'Star': '⭐',
+      'Medal': '🏅',
+      'Hero': '🦸',
+      'Champion': '🏆'
+    };
+
+    async function loadLeaderboard() {
+      try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, orderBy('points', 'desc'), limit(100));
+        const snapshot = await getDocs(q);
+
+        const users = [];
+        snapshot.forEach(doc => {
+          users.push({ id: doc.id, ...doc.data() });
+        });
+
+        if (users.length === 0) {
+          document.getElementById('emptyState').style.display = 'flex';
+          document.querySelector('.podium').style.display = 'none';
+          document.querySelector('.leaderboard-table').style.display = 'none';
+          return;
+        }
+
+        // Update podium
+        if (users[0]) updatePodiumPlace('firstPlace', users[0], 1);
+        if (users[1]) updatePodiumPlace('secondPlace', users[1], 2);
+        if (users[2]) updatePodiumPlace('thirdPlace', users[2], 3);
+
+        // Update table
+        const tbody = document.getElementById('leaderboardBody');
+        tbody.innerHTML = users.map((user, index) => {
+          const rank = index + 1;
+          const badge = badgeEmojis[user.badge] || '🌱';
+          const missions = user.missionsCompleted || 0;
+          
+          return `
+            <tr class="${rank <= 3 ? 'top-rank' : ''}">
+              <td class="rank-cell">
+                ${rank <= 3 ? `<span class="rank-badge rank-${rank}">${rank}</span>` : rank}
+              </td>
+              <td>
+                <div class="user-cell">
+                  <div class="user-avatar">
+                    <i data-lucide="user" width="20" height="20"></i>
+                  </div>
+                  <span class="user-name">${user.username || 'Anonymous'}</span>
+                </div>
+              </td>
+              <td class="badge-cell">
+                <span class="badge-display">${badge} ${user.badge || 'Seedling'}</span>
+              </td>
+              <td class="points-cell">${user.points?.toLocaleString() || 0}</td>
+              <td class="missions-cell">${missions}</td>
+            </tr>
+          `;
+        }).join('');
+
+        // Update stats
+        updateStats(users);
+
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error('Error loading leaderboard:', error);
+        document.getElementById('leaderboardBody').innerHTML = `
+          <tr>
+            <td colspan="5" class="error-cell">
+              <i data-lucide="alert-circle" width="24" height="24"></i>
+              Error loading leaderboard. Please try again.
+            </td>
+          </tr>
+        `;
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+    }
+
+    function updatePodiumPlace(elementId, user, rank) {
+      const element = document.getElementById(elementId);
+      const badge = badgeEmojis[user.badge] || '🌱';
+      
+      element.querySelector('.podium-name').textContent = user.username || 'Anonymous';
+      element.querySelector('.podium-badge').textContent = badge;
+      element.querySelector('.podium-points').textContent = `${user.points?.toLocaleString() || 0} points`;
+    }
+
+    function updateStats(users) {
+      const totalChampions = users.length;
+      const totalPoints = users.reduce((sum, user) => sum + (user.points || 0), 0);
+      const totalMissions = users.reduce((sum, user) => sum + (user.missionsCompleted || 0), 0);
+      const avgPoints = totalChampions > 0 ? Math.round(totalPoints / totalChampions) : 0;
+
+      document.getElementById('totalChampions').textContent = totalChampions.toLocaleString();
+      document.getElementById('totalPoints').textContent = totalPoints.toLocaleString();
+      document.getElementById('totalMissions').textContent = totalMissions.toLocaleString();
+      document.getElementById('avgPoints').textContent = avgPoints.toLocaleString();
+    }
+
+    // Event listeners
+    document.getElementById('refreshBtn').addEventListener('click', loadLeaderboard);
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+      loadLeaderboard();
+    });
+  </script>
+</body>
+</html>
