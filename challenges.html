@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leaderboard — ACEP</title>
+  <title>Challenges — ACEP</title>
   <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
@@ -14,15 +14,15 @@
           <span class="logo__mark">🌿</span>
           <span class="logo__text">
             <span class="logo__name">ACEP</span>
-            <span class="logo__tag">Top explorers</span>
+            <span class="logo__tag">Environmental missions</span>
           </span>
         </a>
         <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false"></button>
         <ul class="nav-links">
           <li><a href="index.html">Home</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="challenges.html">Challenges</a></li>
-          <li><a href="leaderboard.html" class="is-active">Leaderboard</a></li>
+          <li><a href="challenges.html" class="is-active">Challenges</a></li>
+          <li><a href="leaderboard.html">Leaderboard</a></li>
         </ul>
         <div class="nav-actions">
           <span data-auth="user" hidden class="nav-user" data-nav-username></span>
@@ -35,40 +35,32 @@
     <main>
       <section class="hero hero--compact">
         <div class="container">
-          <h1>Leaderboard</h1>
-          <p class="lede">Top 20 explorers by total points — updates live while this page is open.</p>
+          <h1>Environmental challenges</h1>
+          <p class="lede">Pick a mission, go outside, then come back with a photo to earn points.</p>
         </div>
       </section>
 
       <section class="section section--tight">
         <div class="container">
-          <div class="podium" aria-label="Top three">
-            <div class="podium__slot" id="podiumSecond"></div>
-            <div class="podium__slot podium__slot--first" id="podiumFirst"></div>
-            <div class="podium__slot" id="podiumThird"></div>
+          <div class="filters">
+            <button type="button" class="filter-btn is-active" data-filter="all">All</button>
+            <button type="button" class="filter-btn" data-filter="pollution">Pollution</button>
+            <button type="button" class="filter-btn" data-filter="water">Water</button>
+            <button type="button" class="filter-btn" data-filter="waste">Waste &amp; recycling</button>
+            <button type="button" class="filter-btn" data-filter="wildlife">Nature</button>
+            <button type="button" class="filter-btn" data-filter="industrial">Industrial</button>
           </div>
-
-          <div class="your-rank">
-            <div><strong>Your rank</strong> <span id="yourRankDisplay">—</span></div>
-            <div class="muted">Your points: <strong id="yourPointsDisplay">—</strong></div>
-          </div>
-
-          <div class="rankings-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Name</th>
-                  <th>Points</th>
-                  <th>Badge tier</th>
-                </tr>
-              </thead>
-              <tbody id="rankingsBody"></tbody>
-            </table>
-          </div>
+          <div class="challenges-grid" id="challengesGrid"></div>
         </div>
       </section>
     </main>
+
+    <div class="modal" id="challengeModal" hidden aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+      <div class="modal__dialog" role="document">
+        <button type="button" class="modal__close" id="closeChallengeModal" aria-label="Close">×</button>
+        <div id="challengeModalBody"></div>
+      </div>
+    </div>
 
     <footer class="site-footer">
       <div class="container footer-bottom">
@@ -84,7 +76,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
   <script src="scripts/firebase-config.js"></script>
   <script src="scripts/auth.js"></script>
-  <script src="scripts/leaderboard.js"></script>
+  <script src="scripts/image-upload.js"></script>
+  <script src="scripts/challenges-data.js"></script>
+  <script src="scripts/challenges.js"></script>
   <script src="scripts/site.js"></script>
 </body>
 </html>

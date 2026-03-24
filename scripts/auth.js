@@ -1,123 +1,160 @@
-// Authentication Functions
-const authFunctions = {
-  async signUp(email, password, username) {
-    try {
-      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-      const user = userCredential.user;
-      
-      // Create user document in Firestore
-      await db.collection('users').doc(user.uid).set({
-        uid: user.uid,
-        email: email,
-        username: username,
-        points: 0,
-        badge: '🌱',
-        missionsCompleted: 0,
+/**
+ * ACEP — Authentication, session handling, user profile in Firestore
+ * Uses one auth listener; init() registers callbacks.
+ */
+(function () {
+  const badgeFromPoints = (points) => {
+    const p = Number(points) || 0;
+    if (p <= 100) return { name: 'Beginner', emoji: '🌱' };
+    if (p <= 500) return { name: 'Explorer', emoji: '🌿' };
+    if (p <= 1000) return { name: 'Champion', emoji: '🌳' };
+    return { name: 'Legend', emoji: '🏆' };
+  };
+
+  let authListenerStarted = false;
+  let authResolved = false;
+  let lastUser = null;
+  let lastProfile = null;
+  const callbacks = [];
+
+  async function ensureUserProfile(firebaseUser) {
+    if (!window.acep || !firebaseUser) return null;
+    const { db, FieldValue } = window.acep;
+    const ref = db.collection('users').doc(firebaseUser.uid);
+    const snap = await ref.get();
+
+    if (!snap.exists) {
+      const b = badgeFromPoints(0);
+      await ref.set({
+        username: firebaseUser.displayName || 'Eco Explorer',
+        email: firebaseUser.email || '',
+        totalPoints: 0,
         challengesCompleted: [],
-        joinedDate: firebase.firestore.FieldValue.serverTimestamp()
+        currentBadge: b.name,
+        createdAt: FieldValue.serverTimestamp(),
+        lastActive: FieldValue.serverTimestamp(),
       });
-      
-      showNotification(`Welcome ${username}! Account created successfully!`, 'success');
-      return user;
-    } catch (error) {
-      showNotification(error.message, 'error');
-      throw error;
+      const again = await ref.get();
+      return { id: firebaseUser.uid, ...again.data() };
     }
-  },
 
-  async signIn(email, password) {
-    try {
-      const userCredential = await auth.signInWithEmailAndPassword(email, password);
-      showNotification('Signed in successfully!', 'success');
-      return userCredential.user;
-    } catch (error) {
-      showNotification(error.message, 'error');
-      throw error;
+    await ref.update({ lastActive: FieldValue.serverTimestamp() });
+    return { id: firebaseUser.uid, ...snap.data() };
+  }
+
+  function setNavAuthState(user) {
+    document.querySelectorAll('[data-auth="guest"]').forEach((el) => {
+      el.hidden = !!user;
+    });
+    document.querySelectorAll('[data-auth="user"]').forEach((el) => {
+      el.hidden = !user;
+    });
+    const nameEl = document.querySelector('[data-nav-username]');
+    if (nameEl && user) {
+      nameEl.textContent = user.displayName || user.email || 'Explorer';
     }
-  },
+  }
 
-  async signOut() {
-    try {
+  function runCallbacks() {
+    callbacks.forEach((fn) => {
+      try {
+        fn(lastUser, lastProfile);
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }
+
+  function startAuthListener() {
+    if (authListenerStarted) return;
+    authListenerStarted = true;
+    const { auth } = window.acep;
+
+    auth.onAuthStateChanged(async (user) => {
+      lastUser = user;
+      setNavAuthState(user);
+
+      if (!user) {
+        lastProfile = null;
+        authResolved = true;
+        runCallbacks();
+        return;
+      }
+
+      try {
+        lastProfile = await ensureUserProfile(user);
+      } catch (e) {
+        console.error('Profile sync failed:', e);
+        lastProfile = null;
+      }
+      authResolved = true;
+      runCallbacks();
+    });
+  }
+
+  window.acepAuth = {
+    badgeFromPoints,
+
+    async register(email, password, username) {
+      const { auth } = window.acep;
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      if (username && cred.user) {
+        await cred.user.updateProfile({ displayName: username.trim() });
+      }
+      await ensureUserProfile(cred.user);
+      return cred.user;
+    },
+
+    async login(email, password) {
+      const { auth } = window.acep;
+      const cred = await auth.signInWithEmailAndPassword(email, password);
+      await ensureUserProfile(cred.user);
+      return cred.user;
+    },
+
+    async logout() {
+      const { auth } = window.acep;
       await auth.signOut();
-      showNotification('Signed out successfully!', 'success');
-      window.location.href = 'index.html';
-    } catch (error) {
-      showNotification(error.message, 'error');
-      throw error;
-    }
-  }
-};
+    },
 
-// Notification system
-function showNotification(message, type = 'info') {
-  // Remove existing notifications
-  const existing = document.querySelector('.notification');
-  if (existing) existing.remove();
-  
-  const notification = document.createElement('div');
-  notification.className = `notification notification-${type}`;
-  notification.textContent = message;
-  
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    z-index: 10000;
-    animation: slideIn 0.3s ease-out;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    max-width: 400px;
-  `;
-  
-  if (type === 'success') {
-    notification.style.background = '#d1fae5';
-    notification.style.color = '#065f46';
-    notification.style.border = '2px solid #059669';
-  } else if (type === 'error') {
-    notification.style.background = '#fee2e2';
-    notification.style.color = '#991b1b';
-    notification.style.border = '2px solid #ef4444';
-  } else {
-    notification.style.background = '#dbeafe';
-    notification.style.color = '#1e40af';
-    notification.style.border = '2px solid #3b82f6';
-  }
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.style.animation = 'slideOut 0.3s ease-out';
-    setTimeout(() => notification.remove(), 300);
-  }, 4000);
-}
+    async getProfile(uid) {
+      const { db } = window.acep;
+      const snap = await db.collection('users').doc(uid).get();
+      if (!snap.exists) return null;
+      return { id: snap.id, ...snap.data() };
+    },
 
-// Add animation styles
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes slideIn {
-    from {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes slideOut {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-  }
-`;
-document.head.appendChild(style);
+    /**
+     * @param {{ requireAuth?: boolean, redirectTo?: string, onReady?: Function }} options
+     */
+    init(options = {}) {
+      if (!window.acep) {
+        console.error('acep not ready');
+        return Promise.resolve({ user: null, profile: null });
+      }
 
-console.log('✅ Auth functions loaded');
+      const redirectTo = options.redirectTo || 'index.html';
+      const requireAuth = !!options.requireAuth;
+
+      const handler = (user, profile) => {
+        if (requireAuth && !user) {
+          const next = encodeURIComponent(window.location.pathname.split('/').pop() || '');
+          window.location.href = `${redirectTo}${redirectTo.includes('?') ? '&' : '?'}next=${next}`;
+          return;
+        }
+        if (typeof options.onReady === 'function') {
+          options.onReady(user, profile);
+        }
+      };
+
+      callbacks.push(handler);
+      startAuthListener();
+
+      if (authResolved) {
+        handler(lastUser, lastProfile);
+      }
+
+      return Promise.resolve({ user: lastUser, profile: lastProfile });
+    },
+  };
+})();

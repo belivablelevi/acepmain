@@ -1,69 +1,41 @@
-// Image Upload & Compression
-window.imageUpload = {
-  async compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        const img = new Image();
-        
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          
-          // Calculate new dimensions
-          if (width > height) {
-            if (width > maxWidth) {
-              height = (height * maxWidth) / width;
-              width = maxWidth;
-            }
-          } else {
-            if (height > maxHeight) {
-              width = (width * maxHeight) / height;
-              height = maxHeight;
-            }
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          canvas.toBlob(
-            (blob) => {
-              resolve(new File([blob], file.name, {
-                type: 'image/jpeg',
-                lastModified: Date.now()
-              }));
-            },
-            'image/jpeg',
-            quality
-          );
-        };
-        
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  },
+/**
+ * ACEP — Firebase Storage upload helpers for challenge photos
+ */
+(function () {
+  const MAX_BYTES = 5 * 1024 * 1024;
+  const ALLOWED = /^image\/(jpeg|jpg|png|gif|webp)$/i;
 
-  async convertImageToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        resolve(e.target.result);
-      };
-      
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-};
+  window.acepUpload = {
+    MAX_BYTES,
 
-console.log('✅ Image upload utilities loaded');
+    validateFile(file) {
+      if (!file || !(file instanceof File)) {
+        return { ok: false, message: 'Please choose a photo to upload.' };
+      }
+      if (!ALLOWED.test(file.type)) {
+        return { ok: false, message: 'Please upload a JPG, PNG, GIF, or WebP image.' };
+      }
+      if (file.size > MAX_BYTES) {
+        return { ok: false, message: 'That file is too large. Maximum size is 5 MB.' };
+      }
+      return { ok: true };
+    },
+
+    /**
+     * @returns {Promise<string>} download URL
+     */
+    async uploadSubmissionPhoto(userId, file) {
+      const v = this.validateFile(file);
+      if (!v.ok) {
+        throw new Error(v.message);
+      }
+      const { storage } = window.acep;
+      const safeName = file.name.replace(/[^\w.\-]/g, '_');
+      const path = `submissions/${userId}/${Date.now()}_${safeName}`;
+      const ref = storage.ref(path);
+      const meta = { contentType: file.type || 'image/jpeg' };
+      await ref.put(file, meta);
+      return ref.getDownloadURL();
+    },
+  };
+})();
