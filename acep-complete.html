@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACEP - Alliance for Canadian Environmental Protection</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Firebase v9 modular SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit, updateDoc, doc, getDoc, onSnapshot, increment, setDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
+    
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDeq9Cpi8Jr4hGQOh2YOPQR-GYvlhRr8nQ",
+      authDomain: "acep-11d20.firebaseapp.com",
+      projectId: "acep-11d20",
+      storageBucket: "acep-11d20.firebasestorage.app",
+      messagingSenderId: "648606466091",
+      appId: "1:648606466091:web:5fa808c5b474239d512a6e"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    window.firebaseAuth = getAuth(app);
+    window.firebaseDb = getFirestore(app);
+    window.firebaseStorage = getStorage(app);
+    
+    // Export Firebase functions to window
+    window.firebaseFunctions = {
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      collection,
+      addDoc,
+      getDocs,
+      query,
+      where,
+      orderBy,
+      limit,
+      updateDoc,
+      doc,
+      getDoc,
+      onSnapshot,
+      increment,
+      setDoc,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    };
+  </script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+    
+    /* Navigation */
+    .nav {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+    }
+    
+    .nav-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .nav-logo {
+      font-size: 1.75rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+      cursor: pointer;
+      letter-spacing: -0.5px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+      align-items: center;
+    }
+    
+    .nav-link {
+      color: #6b7280;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #10b981;
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 100%;
+    }
+    
+    .nav-link:hover, 
+    .nav-link.active {
+      color: #10b981;
+    }
+    
+    .nav-auth {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 0.625rem 1.75rem;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: #059669;
+      border: 2px solid #10b981;
+    }
+    
+    .btn-secondary:hover {
+      background: #ecfdf5;
+      border-color: #059669;
+    }
+    
+    .btn-ghost {
+      background: transparent;
+      color: #6b7280;
+      box-shadow: none;
+    }
+    
+    .btn-ghost:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    
+    .btn-small {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #064e3b 0%, #047857 25%, #059669 50%, #10b981 75%, #34d399 100%);
+      color: white;
+      padding: 5rem 2rem 6rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="1.5" fill="white" opacity="0.1"/></svg>');
+      opacity: 0.4;
+    }
+    
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      letter-spacing: -1px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero p {
+      font-size: 1.35rem;
+      margin-bottom: 2.5rem;
+      opacity: 0.95;
+      font-weight: 400;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-icons {
+      font-size: 3.5rem;
+      margin: 2.5rem 0;
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-icons span {
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .hero-icons span:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+    
+    .hero-icons span:nth-child(3) {
+      animation-delay: 1s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .hero-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+      text-align: left;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero-feature {
+      display: flex;
+      align-items: start;
+      gap: 1.25rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .hero-feature:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-4px);
+    }
+    
+    .hero-feature-icon {
+      font-size: 2.25rem;
+    }
+    
+    .hero-feature h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .hero-feature p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin: 0;
+    }
+    
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    /* Challenge Grid */
+    .challenges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2.5rem;
+    }
+    
+    .challenge-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .challenge-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #10b981, #059669);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .challenge-card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    .challenge-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(16, 185, 129, 0.15);
+    }
+    
+    .difficulty-badge {
+      display: inline-block;
+      padding: 0.375rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    
+    .difficulty-easy {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+    }
+    
+    .difficulty-medium {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+    }
+    
+    .difficulty-hard {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+    }
+    
+    .challenge-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #111827;
+      letter-spacing: -0.3px;
+    }
+    
+    .challenge-description {
+      color: #6b7280;
+      font-size: 0.975rem;
+      margin-bottom: 1.25rem;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    
+    .challenge-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid #f3f4f6;
+    }
+    
+    .challenge-points {
+      color: #10b981;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+    
+    /* Leaderboard */
+    .leaderboard-list {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid #f9fafb;
+      transition: background 0.2s ease;
+    }
+    
+    .leaderboard-item:hover {
+      background: #fafafa;
+    }
+    
+    .leaderboard-item:last-child {
+      border-bottom: none;
+    }
+    
+    .leaderboard-item.current-user {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-left: 4px solid #10b981;
+    }
+    
+    .leaderboard-rank {
+      font-weight: 600;
+      color: #9ca3af;
+      margin-right: 1.25rem;
+      min-width: 40px;
+      font-size: 1.1rem;
+    }
+    
+    .leaderboard-item:nth-child(1) .leaderboard-rank {
+      color: #fbbf24;
+    }
+    
+    .leaderboard-item:nth-child(2) .leaderboard-rank {
+      color: #9ca3af;
+    }
+    
+    .leaderboard-item:nth-child(3) .leaderboard-rank {
+      color: #d97706;
+    }
+    
+    .leaderboard-user {
+      flex: 1;
+      font-weight: 500;
+      font-size: 1.05rem;
+    }
+    
+    .leaderboard-points {
+      color: #10b981;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+    
+    .leaderboard-badge {
+      margin-left: 0.75rem;
+      font-size: 1.3rem;
+    }
+    
+    /* Dashboard Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+    
+    .stat-value {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+    }
+    
+    .stat-label {
+      color: #6b7280;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 1.75rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.625rem;
+      font-weight: 500;
+      color: #374151;
+      font-size: 0.95rem;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: #fafafa;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+      background: white;
+    }
+    
+    textarea.form-input {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.5px;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: #f3f4f6;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6b7280;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+    
+    .modal-close:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      color: #6b7280;
+    }
+    
+    .spinner {
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #10b981;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Success/Error Messages */
+    .alert {
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      border-left: 4px solid;
+    }
+    
+    .alert-success {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+      border-left-color: #10b981;
+    }
+    
+    .alert-error {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+      border-left-color: #ef4444;
+    }
+    
+    .alert-info {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      color: #1e40af;
+      border-left-color: #3b82f6;
+    }
+    
+    /* File upload */
+    .file-upload {
+      border: 3px dashed #d1d5db;
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+    
+    .file-upload:hover {
+      border-color: #10b981;
+      background: #ecfdf5;
+      transform: scale(1.02);
+    }
+    
+    .file-upload input {
+      display: none;
+    }
+    
+    .file-preview {
+      max-width: 100%;
+      max-height: 350px;
+      border-radius: 12px;
+      margin-top: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    /* Submissions */
+    .submissions-list {
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    
+    .submission-item {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      display: flex;
+      gap: 2rem;
+      align-items: start;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .submission-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+    
+    .submission-image {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .submission-details {
+      flex: 1;
+    }
+    
+    .submission-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #111827;
+    }
+    
+    .submission-date {
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .submission-points {
+      color: #10b981;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    /* About Section */
+    .about-section {
+      margin-bottom: 4rem;
+    }
+    
+    .about-section h2 {
+      font-size: 2.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #111827;
+      letter-spacing: -0.5px;
+    }
+    
+    .about-section p {
+      font-size: 1.125rem;
+      line-height: 1.9;
+      color: #4b5563;
+      margin-bottom: 1.25rem;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2.5rem;
+      margin-top: 3rem;
+    }
+    
+    .feature-item {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .feature-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
+    }
+    
+    .feature-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1.25rem;
+    }
+    
+    .feature-item h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: #111827;
+    }
+    
+    .feature-item p {
+      color: #6b7280;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-container {
+        padding: 1rem 1.5rem;
+      }
+      
+      .nav-links {
+        flex-basis: 100%;
+        order: 3;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .hero {
+        padding: 3.5rem 1.5rem 4.5rem;
+      }
+      
+      .hero h1 {
+        font-size: 2.25rem;
+      }
+      
+      .hero p {
+        font-size: 1.125rem;
+      }
+      
+      .challenges-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .submission-item {
+        flex-direction: column;
+      }
+      
+      .submission-image {
+        width: 100%;
+        height: 220px;
+      }
+      
+      .container {
+        padding: 2rem 1.5rem;
+      }
+    }
+    
+    .page-title {
+      font-size: 2.75rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: #111827;
+      letter-spacing: -1px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    .empty-state-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    
+    // Challenge data
+    const CHALLENGES = [
+      {
+        id: 'challenge_01',
+        title: 'Litter Patrol',
+        description: 'Clean up litter in your neighborhood',
+        longDescription: 'Help keep your community clean by collecting litter. Take a photo of the trash you collected before disposing of it properly.',
+        points: 75,
+        difficulty: 'easy',
+        category: 'pollution',
+        emoji: '🗑️',
+        requiresParent: false
+      },
+      {
+        id: 'challenge_02',
+        title: 'Water Saver',
+        description: 'Save water at home',
+        longDescription: 'Find ways to save water at home. Fix leaky faucets, take shorter showers, or collect rainwater. Photo document your water-saving action.',
+        points: 90,
+        difficulty: 'easy',
+        category: 'conservation',
+        emoji: '💧',
+        requiresParent: false
+      },
+      {
+        id: 'challenge_03',
+        title: 'Battery Recycler',
+        description: 'Collect and recycle batteries',
+        longDescription: 'Gather old batteries from around your home and take them to a proper recycling location. Take a photo of the batteries before recycling.',
+        points: 100,
+        difficulty: 'easy',
+        category: 'recycling',
+        emoji: '🔋',
+        requiresParent: false
+      },
+      {
+        id: 'challenge_04',
+        title: 'Nature Explorer',
+        description: 'Discover local wildlife',
+        longDescription: 'Go on a nature walk and photograph local wildlife or plants. Learn about the species you find and their role in the ecosystem.',
+        points: 85,
+        difficulty: 'easy',
+        category: 'education',
+        emoji: '🌳',
+        requiresParent: false
+      },
+      {
+        id: 'challenge_05',
+        title: 'Pollution Detective',
+        description: 'Document pollution with photos',
+        longDescription: 'Find and photograph pollution in your area (litter, illegal dumping, etc.). Report the location and type of pollution.',
+        points: 150,
+        difficulty: 'medium',
+        category: 'reporting',
+        emoji: '🏭',
+        requiresParent: true
+      },
+      {
+        id: 'challenge_06',
+        title: 'Storm Drain Steward',
+        description: 'Report storm drain issues',
+        longDescription: 'Check storm drains in your neighborhood for blockages or pollution. Photo document any issues and report them to local authorities.',
+        points: 100,
+        difficulty: 'easy',
+        category: 'reporting',
+        emoji: '🌊',
+        requiresParent: false
+      },
+      {
+        id: 'challenge_07',
+        title: 'Algae Bloom Monitor',
+        description: 'Track algae blooms in local water',
+        longDescription: 'Monitor local water bodies for algae blooms. Take photos if you see unusual algae growth and note the location and date.',
+        points: 125,
+        difficulty: 'medium',
+        category: 'monitoring',
+        emoji: '🦠',
+        requiresParent: true
+      },
+      {
+        id: 'challenge_08',
+        title: 'Water Quality Tester',
+        description: 'Test water quality in your area',
+        longDescription: 'If you have access to water testing equipment, test a local water source. Document your findings with photos and notes.',
+        points: 200,
+        difficulty: 'hard',
+        category: 'testing',
+        emoji: '🔬',
+        requiresParent: true
+      },
+      {
+        id: 'challenge_09',
+        title: 'Hazardous Waste Hunter',
+        description: 'Find improper waste disposal',
+        longDescription: 'Look for improperly disposed hazardous waste (paint cans, chemicals, etc.). Photo document from a safe distance and report to authorities.',
+        points: 175,
+        difficulty: 'hard',
+        category: 'reporting',
+        emoji: '☠️',
+        requiresParent: true
+      },
+      {
+        id: 'challenge_10',
+        title: 'Industrial Runoff Reporter',
+        description: 'Report industrial pollution',
+        longDescription: 'If you notice suspicious discharge from industrial sites into waterways, document it safely with photos and report it.',
+        points: 150,
+        difficulty: 'medium',
+        category: 'reporting',
+        emoji: '🏭',
+        requiresParent: true
+      }
+    ];
+    
+    // Get badge for points
+    const getBadge = (points) => {
+      if (points >= 1001) return { name: 'Legend', emoji: '🏆' };
+      if (points >= 501) return { name: 'Champion', emoji: '🌳' };
+      if (points >= 101) return { name: 'Explorer', emoji: '🌿' };
+      return { name: 'Beginner', emoji: '🌱' };
+    };
+    
+    // Format date
+    const formatDate = (timestamp) => {
+      if (!timestamp) return '';
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+    
+    // Main App Component
+    function App() {
+      const [currentPage, setCurrentPage] = useState('home');
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [userData, setUserData] = useState(null);
+      
+      useEffect(() => {
+        // Wait for Firebase to load
+        const checkFirebase = setInterval(() => {
+          if (window.firebaseAuth && window.firebaseFunctions) {
+            clearInterval(checkFirebase);
+            initAuth();
+          }
+        }, 100);
+        
+        return () => clearInterval(checkFirebase);
+      }, []);
+      
+      const initAuth = () => {
+        const { onAuthStateChanged } = window.firebaseFunctions;
+        onAuthStateChanged(window.firebaseAuth, async (user) => {
+          setUser(user);
+          if (user) {
+            await loadUserData(user.uid);
+          } else {
+            setUserData(null);
+          }
+          setLoading(false);
+        });
+      };
+      
+      const loadUserData = async (userId) => {
+        try {
+          const { doc, getDoc } = window.firebaseFunctions;
+          const userDoc = await getDoc(doc(window.firebaseDb, 'users', userId));
+          if (userDoc.exists()) {
+            setUserData({ id: userDoc.id, ...userDoc.data() });
+          }
+        } catch (error) {
+          console.error('Error loading user data:', error);
+        }
+      };
+      
+      const handleSignOut = async () => {
+        try {
+          const { signOut } = window.firebaseFunctions;
+          await signOut(window.firebaseAuth);
+          setCurrentPage('home');
+        } catch (error) {
+          console.error('Error signing out:', error);
+        }
+      };
+      
+      if (loading) {
+        return (
+          <div className="loading">
+            <div className="spinner"></div>
+            <p>Loading ACEP...</p>
+          </div>
+        );
+      }
+      
+      return (
+        <div>
+          <Navigation 
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            user={user}
+            userData={userData}
+            onSignOut={handleSignOut}
+          />
+          
+          {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} user={user} />}
+          {currentPage === 'about' && <AboutPage />}
+          {currentPage === 'challenges' && <ChallengesPage user={user} userData={userData} loadUserData={loadUserData} />}
+          {currentPage === 'leaderboard' && <LeaderboardPage user={user} userData={userData} />}
+          {currentPage === 'dashboard' && <DashboardPage user={user} userData={userData} loadUserData={loadUserData} />}
+          {currentPage === 'auth' && <AuthPage setCurrentPage={setCurrentPage} />}
+        </div>
+      );
+    }
+    
+    // Navigation Component
+    function Navigation({ currentPage, setCurrentPage, user, userData, onSignOut }) {
+      return (
+        <nav className="nav">
+          <div className="nav-container">
+            <a className="nav-logo" onClick={() => setCurrentPage('home')}>
+              ACEP
+            </a>
+            
+            <ul className="nav-links">
+              <li>
+                <a 
+                  className={`nav-link ${currentPage === 'home' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('home')}
+                >
+                  Home
+                </a>
+              </li>
+              <li>
+                <a 
+                  className={`nav-link ${currentPage === 'about' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('about')}
+                >
+                  About
+                </a>
+              </li>
+              <li>
+                <a 
+                  className={`nav-link ${currentPage === 'challenges' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('challenges')}
+                >
+                  Challenges
+                </a>
+              </li>
+              <li>
+                <a 
+                  className={`nav-link ${currentPage === 'leaderboard' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('leaderboard')}
+                >
+                  Leaderboard
+                </a>
+              </li>
+              {user && (
+                <li>
+                  <a 
+                    className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`}
+                    onClick={() => setCurrentPage('dashboard')}
+                  >
+                    Dashboard
+                  </a>
+                </li>
+              )}
+            </ul>
+            
+            <div className="nav-auth">
+              {user ? (
+                <>
+                  <span style={{ color: '#6b7280', fontSize: '0.95rem' }}>
+                    {userData ? `${userData.totalPoints || 0} pts` : ''}
+                  </span>
+                  <button className="btn btn-ghost btn-small" onClick={onSignOut}>
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <button className="btn btn-primary btn-small" onClick={() => setCurrentPage('auth')}>
+                  Sign In
+                </button>
+              )}
+            </div>
+          </div>
+        </nav>
+      );
+    }
+    
+    // Home Page
+    function HomePage({ setCurrentPage, user }) {
+      return (
+        <div>
+          <div className="hero">
+            <h1>Teach Kids to Protect Nature</h1>
+            <p>Fun environmental missions for families across Canada</p>
+            <div className="hero-icons">
+              <span>🌊</span>
+              <span>🌱</span>
+              <span>🦋</span>
+            </div>
+            
+            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {user ? (
+                <button className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }} onClick={() => setCurrentPage('challenges')}>
+                  Browse Challenges
+                </button>
+              ) : (
+                <>
+                  <button className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }} onClick={() => setCurrentPage('auth')}>
+                    Get Started Free
+                  </button>
+                  <button className="btn btn-secondary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }} onClick={() => setCurrentPage('about')}>
+                    Learn More
+                  </button>
+                </>
+              )}
+            </div>
+            
+            <div className="hero-features">
+              <div className="hero-feature">
+                <div className="hero-feature-icon">🏞️</div>
+                <div>
+                  <h3>Get Kids Outside</h3>
+                  <p>Fun outdoor activities in your neighborhood</p>
+                </div>
+              </div>
+              <div className="hero-feature">
+                <div className="hero-feature-icon">🧠</div>
+                <div>
+                  <h3>Educational</h3>
+                  <p>Learn about pollution and conservation</p>
+                </div>
+              </div>
+              <div className="hero-feature">
+                <div className="hero-feature-icon">👨‍👩‍👧</div>
+                <div>
+                  <h3>Family Bonding</h3>
+                  <p>Complete missions together as a family</p>
+                </div>
+              </div>
+              <div className="hero-feature">
+                <div className="hero-feature-icon">🎮</div>
+                <div>
+                  <h3>Gamified Fun</h3>
+                  <p>Earn points, badges, and rewards</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="container">
+            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+              <h2 style={{ fontSize: '2rem', fontWeight: '400', marginBottom: '1rem' }}>How ACEP Works</h2>
+              <p style={{ fontSize: '1.1rem', color: '#6b7280' }}>4 simple steps to environmental action</p>
+            </div>
+            
+            <div className="features-grid">
+              <div className="feature-item">
+                <div className="feature-icon">1️⃣</div>
+                <h3>Sign Up Free</h3>
+                <p>Parents create an account in 30 seconds</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">2️⃣</div>
+                <h3>Pick a Mission</h3>
+                <p>Choose from 10 fun environmental challenges</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">3️⃣</div>
+                <h3>Complete Together</h3>
+                <p>Have fun, learn, and make a real impact</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">4️⃣</div>
+                <h3>Earn Points</h3>
+                <p>Kids earn points, badges, and bragging rights</p>
+              </div>
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '400', marginBottom: '1rem' }}>Ages 8+ • 100% Free • Safe & Educational</h3>
+              {!user && (
+                <button className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }} onClick={() => setCurrentPage('auth')}>
+                  Start Your First Mission →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // About Page
+    function AboutPage() {
+      return (
+        <div className="container">
+          <h1 className="page-title">About ACEP</h1>
+          
+          <div className="about-section">
+            <h2>Our Mission</h2>
+            <p>
+              ACEP (Alliance for Canadian Environmental Protection) is a family-friendly platform that makes environmental action fun, educational, and rewarding for kids and parents across Canada.
+            </p>
+            <p>
+              We believe that protecting our environment starts with education and action. By gamifying environmental challenges, we're inspiring the next generation of environmental champions while creating quality family bonding time.
+            </p>
+          </div>
+          
+          <div className="about-section">
+            <h2>Why ACEP?</h2>
+            <div className="features-grid">
+              <div className="feature-item">
+                <div className="feature-icon">🌍</div>
+                <h3>Real Impact</h3>
+                <p>Every mission completed makes a real difference in protecting Canada's environment</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">👨‍👩‍👧‍👦</div>
+                <h3>Family-Focused</h3>
+                <p>Designed for families with kids ages 8+ to enjoy together</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">📚</div>
+                <h3>Educational</h3>
+                <p>Learn about pollution, conservation, and ecosystems through hands-on experience</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">🎯</div>
+                <h3>Engaging</h3>
+                <p>Points, badges, and leaderboards make environmental action exciting</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">🔒</div>
+                <h3>Safe</h3>
+                <p>Age-appropriate challenges with parent guidance recommendations</p>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">💯</div>
+                <h3>Free Forever</h3>
+                <p>100% free platform with no hidden costs or subscriptions</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="about-section">
+            <h2>Our Challenges</h2>
+            <p>
+              We offer 10 carefully designed environmental challenges ranging from easy (like Litter Patrol) to more advanced (like Water Quality Testing). Each challenge includes:
+            </p>
+            <ul style={{ marginLeft: '2rem', marginTop: '1rem', color: '#4b5563', fontSize: '1.1rem' }}>
+              <li style={{ marginBottom: '0.5rem' }}>Clear, step-by-step instructions</li>
+              <li style={{ marginBottom: '0.5rem' }}>Photo documentation requirements</li>
+              <li style={{ marginBottom: '0.5rem' }}>Points rewards (75-200 points)</li>
+              <li style={{ marginBottom: '0.5rem' }}>Age-appropriate difficulty ratings</li>
+              <li style={{ marginBottom: '0.5rem' }}>Parent guidance recommendations where needed</li>
+            </ul>
+          </div>
+          
+          <div className="about-section">
+            <h2>Get Involved</h2>
+            <p>
+              Ready to turn screen time into green time? Sign up today and start your family's environmental adventure!
+            </p>
+            <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+              <button className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }} onClick={() => window.scrollTo(0, 0)}>
+                Get Started Free
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Challenges Page
+    function ChallengesPage({ user, userData, loadUserData }) {
+      const [selectedChallenge, setSelectedChallenge] = useState(null);
+      const [showSubmitModal, setShowSubmitModal] = useState(false);
+      
+      const handleChallengeClick = (challenge) => {
+        setSelectedChallenge(challenge);
+      };
+      
+      const handleSubmitClick = (challenge) => {
+        if (!user) {
+          alert('Please sign in to submit challenges!');
+          return;
+        }
+        setSelectedChallenge(challenge);
+        setShowSubmitModal(true);
+      };
+      
+      return (
+        <div className="container">
+          <h1 className="page-title">Environmental Challenges</h1>
+          <p style={{ fontSize: '1.1rem', color: '#6b7280', marginBottom: '2rem' }}>
+            Choose a challenge, complete it with your family, and upload photo evidence!
+          </p>
+          
+          <div className="challenges-grid">
+            {CHALLENGES.map(challenge => (
+              <div 
+                key={challenge.id} 
+                className="challenge-card"
+                onClick={() => handleChallengeClick(challenge)}
+              >
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>{challenge.emoji}</div>
+                <span className={`difficulty-badge difficulty-${challenge.difficulty}`}>
+                  {challenge.difficulty.toUpperCase()}
+                  {challenge.requiresParent && ' - With Parent'}
+                </span>
+                <h3 className="challenge-title">{challenge.title}</h3>
+                <p className="challenge-description">{challenge.description}</p>
+                <div className="challenge-footer">
+                  <span className="challenge-points">{challenge.points} points</span>
+                  <button 
+                    className="btn btn-primary btn-small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSubmitClick(challenge);
+                    }}
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {selectedChallenge && !showSubmitModal && (
+            <ChallengeDetailModal 
+              challenge={selectedChallenge} 
+              onClose={() => setSelectedChallenge(null)}
+              onSubmit={() => setShowSubmitModal(true)}
+              user={user}
+            />
+          )}
+          
+          {showSubmitModal && selectedChallenge && (
+            <SubmitChallengeModal 
+              challenge={selectedChallenge}
+              user={user}
+              onClose={() => {
+                setShowSubmitModal(false);
+                setSelectedChallenge(null);
+              }}
+              onSuccess={async () => {
+                setShowSubmitModal(false);
+                setSelectedChallenge(null);
+                if (loadUserData) {
+                  await loadUserData(user.uid);
+                }
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+    
+    // Challenge Detail Modal
+    function ChallengeDetailModal({ challenge, onClose, onSubmit, user }) {
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={onClose}>×</button>
+            
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{challenge.emoji}</div>
+            <h2 className="modal-header">{challenge.title}</h2>
+            
+            <div style={{ marginBottom: '1.5rem' }}>
+              <span className={`difficulty-badge difficulty-${challenge.difficulty}`}>
+                {challenge.difficulty.toUpperCase()}
+              </span>
+              <span className="challenge-points" style={{ marginLeft: '1rem' }}>
+                {challenge.points} points
+              </span>
+            </div>
+            
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '400', marginBottom: '0.5rem' }}>Description</h3>
+              <p style={{ color: '#6b7280' }}>{challenge.longDescription}</p>
+            </div>
+            
+            {challenge.requiresParent && (
+              <div className="alert alert-info">
+                <strong>Parent Guidance Recommended:</strong> This challenge may require adult supervision or assistance.
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+              <button className="btn btn-secondary" onClick={onClose}>
+                Close
+              </button>
+              {user && (
+                <button className="btn btn-primary" onClick={onSubmit}>
+                  Submit This Challenge
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Submit Challenge Modal
+    function SubmitChallengeModal({ challenge, user, onClose, onSuccess }) {
+      const [selectedFile, setSelectedFile] = useState(null);
+      const [previewUrl, setPreviewUrl] = useState(null);
+      const [notes, setNotes] = useState('');
+      const [uploading, setUploading] = useState(false);
+      const [error, setError] = useState('');
+      
+      const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          if (file.size > 5 * 1024 * 1024) {
+            setError('File too large. Maximum size is 5MB.');
+            return;
+          }
+          if (!file.type.startsWith('image/')) {
+            setError('Please upload an image file.');
+            return;
+          }
+          setSelectedFile(file);
+          setPreviewUrl(URL.createObjectURL(file));
+          setError('');
+        }
+      };
+      
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!selectedFile) {
+          setError('Please select a photo to upload.');
+          return;
+        }
+        
+        setUploading(true);
+        setError('');
+        
+        try {
+          const { ref, uploadBytes, getDownloadURL } = window.firebaseFunctions;
+          const { addDoc, collection, doc, updateDoc, increment, getDoc, setDoc } = window.firebaseFunctions;
+          
+          // Upload photo
+          const storageRef = ref(window.firebaseStorage, `submissions/${user.uid}/${Date.now()}_${selectedFile.name}`);
+          await uploadBytes(storageRef, selectedFile);
+          const photoURL = await getDownloadURL(storageRef);
+          
+          // Create submission
+          await addDoc(collection(window.firebaseDb, 'submissions'), {
+            userId: user.uid,
+            challengeId: challenge.id,
+            challengeTitle: challenge.title,
+            photoURL: photoURL,
+            notes: notes,
+            pointsEarned: challenge.points,
+            submittedAt: new Date(),
+            status: 'approved'
+          });
+          
+          // Update user points
+          const userRef = doc(window.firebaseDb, 'users', user.uid);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            await updateDoc(userRef, {
+              totalPoints: increment(challenge.points),
+              challengesCompleted: increment(1),
+              lastActive: new Date()
+            });
+          } else {
+            // Create user document if it doesn't exist
+            await setDoc(userRef, {
+              email: user.email,
+              username: user.email.split('@')[0],
+              totalPoints: challenge.points,
+              challengesCompleted: 1,
+              createdAt: new Date(),
+              lastActive: new Date()
+            });
+          }
+          
+          alert(`Success! You earned ${challenge.points} points! 🎉`);
+          onSuccess();
+          
+        } catch (error) {
+          console.error('Error submitting challenge:', error);
+          setError('Failed to submit challenge. Please try again.');
+          setUploading(false);
+        }
+      };
+      
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={onClose}>×</button>
+            
+            <h2 className="modal-header">Submit: {challenge.title}</h2>
+            
+            {error && <div className="alert alert-error">{error}</div>}
+            
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">Photo Evidence *</label>
+                <div className="file-upload" onClick={() => document.getElementById('fileInput').click()}>
+                  <input 
+                    id="fileInput"
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                  />
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Preview" className="file-preview" />
+                  ) : (
+                    <div>
+                      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📸</div>
+                      <p>Click to upload photo</p>
+                      <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                        Maximum file size: 5MB
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Notes (optional)</label>
+                <textarea 
+                  className="form-input"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Tell us about your mission..."
+                />
+              </div>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={onClose} disabled={uploading}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={uploading || !selectedFile}>
+                  {uploading ? 'Submitting...' : `Submit for ${challenge.points} Points`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+    
+    // Leaderboard Page
+    function LeaderboardPage({ user, userData }) {
+      const [leaderboard, setLeaderboard] = useState([]);
+      const [loading, setLoading] = useState(true);
+      
+      useEffect(() => {
+        loadLeaderboard();
+      }, []);
+      
+      const loadLeaderboard = async () => {
+        try {
+          const { collection, query, orderBy, limit, getDocs } = window.firebaseFunctions;
+          const q = query(
+            collection(window.firebaseDb, 'users'),
+            orderBy('totalPoints', 'desc'),
+            limit(20)
+          );
+          
+          const snapshot = await getDocs(q);
+          const leaders = [];
+          snapshot.forEach(doc => {
+            leaders.push({ id: doc.id, ...doc.data() });
+          });
+          
+          setLeaderboard(leaders);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error loading leaderboard:', error);
+          setLoading(false);
+        }
+      };
+      
+      if (loading) {
+        return (
+          <div className="container">
+            <div className="loading">
+              <div className="spinner"></div>
+              <p>Loading leaderboard...</p>
+            </div>
+          </div>
+        );
+      }
+      
+      return (
+        <div className="container">
+          <h1 className="page-title">Leaderboard</h1>
+          <p style={{ fontSize: '1.1rem', color: '#6b7280', marginBottom: '2rem' }}>
+            Top environmental champions across Canada 🇨🇦
+          </p>
+          
+          {userData && (
+            <div className="card" style={{ marginBottom: '2rem', background: '#f0fdf4' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: '400', marginBottom: '0.5rem' }}>Your Stats</h3>
+                  <p style={{ color: '#6b7280' }}>
+                    {userData.username || 'Champion'} • {userData.totalPoints || 0} points • 
+                    {getBadge(userData.totalPoints || 0).emoji} {getBadge(userData.totalPoints || 0).name}
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '2rem', color: '#10b981', fontWeight: '400' }}>
+                    #{leaderboard.findIndex(u => u.id === user?.uid) + 1}
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Your Rank</div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className="leaderboard-list">
+            {leaderboard.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">🏆</div>
+                <p>No champions yet. Be the first!</p>
+              </div>
+            ) : (
+              leaderboard.map((leader, index) => {
+                const badge = getBadge(leader.totalPoints || 0);
+                const isCurrentUser = user && leader.id === user.uid;
+                
+                return (
+                  <div 
+                    key={leader.id} 
+                    className={`leaderboard-item ${isCurrentUser ? 'current-user' : ''}`}
+                  >
+                    <span className="leaderboard-rank">#{index + 1}</span>
+                    <span className="leaderboard-user">
+                      {leader.username || leader.email?.split('@')[0] || 'Champion'}
+                      {isCurrentUser && <span style={{ marginLeft: '0.5rem', color: '#10b981' }}>(You)</span>}
+                    </span>
+                    <span className="leaderboard-points">
+                      {leader.totalPoints || 0} pts
+                      <span className="leaderboard-badge" title={badge.name}>
+                        {badge.emoji}
+                      </span>
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    // Dashboard Page
+    function DashboardPage({ user, userData, loadUserData }) {
+      const [submissions, setSubmissions] = useState([]);
+      const [loading, setLoading] = useState(true);
+      
+      useEffect(() => {
+        if (user) {
+          loadSubmissions();
+        }
+      }, [user]);
+      
+      const loadSubmissions = async () => {
+        try {
+          const { collection, query, where, orderBy, getDocs } = window.firebaseFunctions;
+          const q = query(
+            collection(window.firebaseDb, 'submissions'),
+            where('userId', '==', user.uid),
+            orderBy('submittedAt', 'desc')
+          );
+          
+          const snapshot = await getDocs(q);
+          const subs = [];
+          snapshot.forEach(doc => {
+            subs.push({ id: doc.id, ...doc.data() });
+          });
+          
+          setSubmissions(subs);
+          setLoading(false);
+        } catch (error) {
+          console.error('Error loading submissions:', error);
+          setLoading(false);
+        }
+      };
+      
+      if (!user) {
+        return (
+          <div className="container">
+            <div className="empty-state">
+              <div className="empty-state-icon">🔒</div>
+              <h2>Sign In Required</h2>
+              <p>Please sign in to view your dashboard.</p>
+            </div>
+          </div>
+        );
+      }
+      
+      if (loading) {
+        return (
+          <div className="container">
+            <div className="loading">
+              <div className="spinner"></div>
+              <p>Loading dashboard...</p>
+            </div>
+          </div>
+        );
+      }
+      
+      const badge = getBadge(userData?.totalPoints || 0);
+      
+      return (
+        <div className="container">
+          <h1 className="page-title">My Dashboard</h1>
+          
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-value">{userData?.totalPoints || 0}</div>
+              <div className="stat-label">Total Points</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{userData?.challengesCompleted || 0}</div>
+              <div className="stat-label">Challenges Completed</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value" style={{ fontSize: '3rem' }}>{badge.emoji}</div>
+              <div className="stat-label">{badge.name} Badge</div>
+            </div>
+          </div>
+          
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '400', marginBottom: '1.5rem', marginTop: '2rem' }}>
+            Your Submissions
+          </h2>
+          
+          {submissions.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">📸</div>
+              <p>No submissions yet. Complete your first challenge!</p>
+              <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => window.location.reload()}>
+                Browse Challenges
+              </button>
+            </div>
+          ) : (
+            <div className="submissions-list">
+              {submissions.map(submission => (
+                <div key={submission.id} className="submission-item">
+                  <img 
+                    src={submission.photoURL} 
+                    alt={submission.challengeTitle}
+                    className="submission-image"
+                  />
+                  <div className="submission-details">
+                    <h3 className="submission-title">{submission.challengeTitle}</h3>
+                    <p className="submission-date">
+                      {formatDate(submission.submittedAt)}
+                    </p>
+                    {submission.notes && (
+                      <p style={{ color: '#6b7280', fontSize: '0.95rem', marginTop: '0.5rem' }}>
+                        {submission.notes}
+                      </p>
+                    )}
+                    <p className="submission-points">
+                      +{submission.pointsEarned} points
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Auth Page
+    function AuthPage({ setCurrentPage }) {
+      const [isSignUp, setIsSignUp] = useState(true);
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [username, setUsername] = useState('');
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+      
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        
+        try {
+          const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.firebaseFunctions;
+          const { doc, setDoc } = window.firebaseFunctions;
+          
+          if (isSignUp) {
+            // Sign up
+            const userCredential = await createUserWithEmailAndPassword(
+              window.firebaseAuth, 
+              email, 
+              password
+            );
+            
+            // Create user document
+            await setDoc(doc(window.firebaseDb, 'users', userCredential.user.uid), {
+              email: email,
+              username: username || email.split('@')[0],
+              totalPoints: 0,
+              challengesCompleted: 0,
+              createdAt: new Date(),
+              lastActive: new Date()
+            });
+            
+            setCurrentPage('challenges');
+          } else {
+            // Sign in
+            await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+            setCurrentPage('dashboard');
+          }
+        } catch (error) {
+          console.error('Auth error:', error);
+          setError(error.message || 'Authentication failed. Please try again.');
+          setLoading(false);
+        }
+      };
+      
+      return (
+        <div className="container">
+          <div style={{ maxWidth: '500px', margin: '3rem auto' }}>
+            <div className="card">
+              <h2 style={{ fontSize: '2rem', fontWeight: '400', marginBottom: '0.5rem', textAlign: 'center' }}>
+                {isSignUp ? 'Create Account' : 'Sign In'}
+              </h2>
+              <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '2rem' }}>
+                {isSignUp ? 'Start your environmental adventure!' : 'Welcome back!'}
+              </p>
+              
+              {error && <div className="alert alert-error">{error}</div>}
+              
+              <form onSubmit={handleSubmit}>
+                {isSignUp && (
+                  <div className="form-group">
+                    <label className="form-label">Username</label>
+                    <input 
+                      type="text"
+                      className="form-input"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Choose a username"
+                    />
+                  </div>
+                )}
+                
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input 
+                    type="email"
+                    className="form-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="your@email.com"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input 
+                    type="password"
+                    className="form-input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    minLength="6"
+                  />
+                </div>
+                
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', marginTop: '1rem' }}
+                  disabled={loading}
+                >
+                  {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
+                </button>
+              </form>
+              
+              <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                <button 
+                  className="btn btn-ghost"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setError('');
+                  }}
+                >
+                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Render the app
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
